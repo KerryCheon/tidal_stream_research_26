@@ -1,0 +1,11 @@
+astropy
+ipykernel
+jupyter
+matplotlib
+notebook
+numpy
+openpyxl
+pandas
+python-dotenv
+scipy
+specutils

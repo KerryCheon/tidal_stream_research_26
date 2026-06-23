@@ -1,0 +1,9 @@
+.env
+.venv/
+.ipynb_checkpoints/
+__pycache__/
+*.pyc
+.cache/
+data/raw/fits/
+outputs/
+space/

@@ -1,0 +1,30 @@
+category,value,count
+table_use_flag,secondary,171
+table_use_flag,caution,121
+table_use_flag,primary,24
+table_use_flag,RV_CaT_only,19
+rv_quality,usable,125
+rv_quality,good,106
+rv_quality,weak,104
+SP_quality,usable,124
+SP_quality,weak,87
+SP_quality,good,71
+SP_quality,none,53
+FeH_source,SP_Ace+CaT_DP_consensus,170
+FeH_source,SP_Ace_primary_CaT_DP_disagrees,104
+FeH_source,CaT_DP_only,27
+FeH_source,none,26
+FeH_source,SP_Ace_only,8
+aFe_source,SP_Ace,282
+aFe_source,none,53
+SED_status,modeled,268
+SED_status,failed,67
+SED_agreement,check,214
+SED_agreement,no_SED,67
+SED_agreement,consistent,54
+row_count,all_full_machine_readable,335
+row_count,main_paper_not_caution,214
+row_count,candidate_RV_and_chemistry,32
+row_count,candidate_RV_chemistry_not_caution,26
+selection_rule,main_paper,table_use_flag != caution
+selection_rule,candidate_member,rv_member_window_NGC6569 == True AND chem_window_adopted == True
