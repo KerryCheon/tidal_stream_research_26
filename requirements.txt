@@ -1,0 +1,36 @@
+# Core scientific stack (pinned to versions in .venv)
+numpy==2.4.6
+scipy==1.18.0
+pandas==3.0.3
+matplotlib==3.11.0
+matplotlib-inline==0.2.2
+astropy==8.0.0
+agama==1.0
+gala==1.11.0
+galpy==1.11.2  # needs GSL at build time if no wheel: `brew install gsl libomp`
+ipython==9.14.1
+specutils
+python-dotenv
+
+# PDF / docs generation
+Markdown==3.10.2
+reportlab==4.5.1
+pillow==12.2.0
+
+# Misc
+charset-normalizer==3.4.7
+setuptools
+wheel==0.45.1
+
+# falcON N-body gravity solver (used by joe's_Code/leap_frog.py: pyfalcon.gravity)
+# NOTE: do NOT `pip install pyfalcon` from PyPI -- that name is an unrelated
+# open-falcon monitoring client. Install the real one from source (needs a C++
+# compiler); build isolation must be off so it can find numpy/setuptools:
+#   pip install --no-build-isolation git+https://github.com/GalacticDynamics-Oxford/pyfalcon.git
+git+https://github.com/GalacticDynamics-Oxford/pyfalcon.git
+
+# macOS OpenMP fix: agama and galpy each ship their own libomp.dylib, which
+# crashes ("OMP: Error #15") when both are imported. Point galpy's bundled copy
+# at Homebrew's so only one OpenMP runtime loads:
+#   ln -sf /opt/homebrew/opt/libomp/lib/libomp.dylib \
+#     "$(python -c 'import galpy,os;print(os.path.dirname(galpy.__file__))')/.dylibs/libomp.dylib"
