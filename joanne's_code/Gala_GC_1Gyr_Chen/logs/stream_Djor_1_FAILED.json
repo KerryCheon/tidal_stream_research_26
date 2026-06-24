@@ -1,0 +1,7 @@
+{
+  "kind": "stream",
+  "cluster_id": "Djor 1",
+  "error_type": "RuntimeError",
+  "error": "Integration failed with code -3",
+  "traceback": "Traceback (most recent call last):\n  File \"/tmp/ipykernel_2965/747915088.py\", line 11, in <cell line: 0>\n    stream_df, summary = generate_or_load_stream(row)\n                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/tmp/ipykernel_2965/1765698128.py\", line 64, in generate_or_load_stream\n    stream_native, progenitor_final = generator.run(\n                                      ^^^^^^^^^^^^^^\n  File \"/usr/local/lib/python3.12/dist-packages/gala/dynamics/mockstream/mockstream_generator.py\", line 287, in run\n    raw_nbody, raw_stream = mockstream_dop853(\n                            ^^^^^^^^^^^^^^^^^^\n  File \"src/gala/dynamics/mockstream/mockstream.pyx\", line 176, in gala.dynamics.mockstream._mockstream.mockstream_dop853\n  File \"src/gala/dynamics/mockstream/mockstream.pyx\", line 271, in gala.dynamics.mockstream._mockstream.mockstream_dop853\n  File \"src/gala/integrate/cyintegrators/dop853.pyx\", line 75, in gala.integrate.cyintegrators.dop853.dop853_step\nRuntimeError: Integration failed with code -3\n"
+}
