@@ -38,7 +38,8 @@ except ImportError: pyfalcon=None
 
 # whether to plot a movie as the simulation progresses (slows it down considerably!)
 # if set to False, plot only the final snapshot
-plot = True
+plot = os.environ.get('TIDAL_STREAM_PLOT', '1').lower() not in ('0', 'false', 'no', 'off')
+output_path = os.environ.get('TIDAL_STREAM_OUTPUT')
 
 # working units: 1 Msun, 1 kpc, 1 km/s
 agama.setUnits(length=1, velocity=1, mass=1)
@@ -66,7 +67,7 @@ initmass = pot_sat.totalMass()
 # create a spherical isotropic DF for the satellite and sample it with particles
 df_sat = agama.DistributionFunction(type='quasispherical', potential=pot_sat)
 # A smaller particle set keeps each live frame close to the 16.7 ms budget.
-Nbody = 10000
+Nbody = int(os.environ.get('TIDAL_STREAM_NBODY', '10000'))
 xv, mass = agama.GalaxyModel(pot_sat, df_sat).sample(Nbody)
 
 # place the satellite at the apocentre of a moderately eccentric orbit
@@ -79,7 +80,7 @@ r_center = numpy.array([R0, 0, 0, 0, V0, 0])
 xv += r_center
 
 # parameters for the simulation
-tend = 3.0   # total simulation time
+tend = float(os.environ.get('TIDAL_STREAM_TEND', '3.0'))   # total simulation time
 tupd = 2**-6 # simulation-time interval rendered in each frame
 tau  = 2**-8 # timestep of the full N-body sim (typically should be smaller than eps/v, where v is characteristic internal velocity)
 eps  = 0.1   # softening length for the full N-body simulation
@@ -259,6 +260,8 @@ while time < tend:
         frame_delay = max(0.001, frame_period - (walltime.perf_counter() - step_started))
         plt.pause(frame_delay)
 
+if output_path:
+    fig.savefig(output_path, dpi=150, bbox_inches='tight')
 if plot:
     plt.ioff()
-plt.show(block=True)
+    plt.show(block=True)

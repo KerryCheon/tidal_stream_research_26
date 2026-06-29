@@ -1,0 +1,18 @@
+.git
+.venv
+venv
+__pycache__
+*.py[cod]
+.ipynb_checkpoints
+.DS_Store
+
+# Large generated/research artifacts are not needed to build the Python image.
+research_papers
+notes
+outputs
+*.mp4
+*.pdf
+*.pptx
+*.docx
+*.xlsx
+*.tar.gz
