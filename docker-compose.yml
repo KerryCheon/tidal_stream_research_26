@@ -6,7 +6,7 @@ services:
     environment:
       MPLBACKEND: Agg
       TIDAL_STREAM_PLOT: "0"
-      TIDAL_STREAM_OUTPUT: outputs/tidal_stream.png
+      TIDAL_STREAM_OUTPUT: ""
     volumes:
-      - ./outputs:/workspace/outputs
-    command: python agama_stream_sim/example_tidal_stream.py
+      - .:/workspace
+    command: bash

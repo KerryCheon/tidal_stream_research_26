@@ -29,29 +29,54 @@ Build the research image from the project root:
 docker build -t tidal-stream-research .
 ```
 
-Run the default tidal-stream example headlessly. The final plot is written to
-`outputs/tidal_stream.png` on the host:
+The image uses Python 3.12 because the pinned scientific stack has narrower
+Python support than the local venv. `gala==1.11.0` is installed from its tagged
+GitHub source because the PyPI source metadata resolves incorrectly in the
+Linux/aarch64 Docker build. `agama` is installed in a non-interactive step that
+declines optional UNSIO downloads. The Docker build skips `pyfalcon` on Apple
+Silicon because its source currently includes x86-specific headers; the example
+script already falls back to the restricted N-body simulation when `pyfalcon` is
+absent.
+
+Run a shell inside the container when you want a Linux environment with the
+right packages already installed:
 
 ```bash
-docker run --rm -v "$PWD/outputs:/workspace/outputs" tidal-stream-research
+docker compose run --rm tidal-stream
 ```
 
-You can also use Compose:
+Run any Python file through that environment:
 
 ```bash
-docker compose up --build
+docker compose run --rm tidal-stream python agama_stream_sim/example_tidal_stream.py
+```
+
+The Compose setup mounts the repo into `/workspace`, so edits on your machine
+are visible inside the container without rebuilding the image. Rebuild only when
+`requirements.txt` or the Dockerfile changes:
+
+```bash
+docker compose build
+```
+
+By default, the tidal-stream example does not open a plot window or save an
+output file. If you do want to save the final plot, pass an output path:
+
+```bash
+docker compose run --rm \
+  -e TIDAL_STREAM_OUTPUT=outputs/tidal_stream.png \
+  tidal-stream \
+  python agama_stream_sim/example_tidal_stream.py
 ```
 
 Useful runtime knobs:
 
 ```bash
-docker run --rm \
-  -e TIDAL_STREAM_PLOT=0 \
-  -e TIDAL_STREAM_OUTPUT=outputs/tidal_stream.png \
+docker compose run --rm \
   -e TIDAL_STREAM_NBODY=2000 \
   -e TIDAL_STREAM_TEND=0.25 \
-  -v "$PWD/outputs:/workspace/outputs" \
-  tidal-stream-research
+  tidal-stream \
+  python agama_stream_sim/example_tidal_stream.py
 ```
 
 Set `TIDAL_STREAM_PLOT=1` only when running with a display-capable Matplotlib
