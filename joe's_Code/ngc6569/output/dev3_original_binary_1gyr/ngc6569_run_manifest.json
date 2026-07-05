@@ -1,0 +1,13 @@
+{
+  "source_notebook": "NGC6569_Dev3_original.ipynb",
+  "run_notebook": "NGC6569_Dev3_original_binary_1Gyr.ipynb",
+  "duration_Myr": 1000.0,
+  "Nbody": 150000,
+  "binary_tables": [
+    "ngc6569_initial_cluster_frame.bin",
+    "ngc6569_petar_initial.bin",
+    "ngc6569_final_particles.bin",
+    "ngc6569_mass_loss.bin",
+    "ngc6569_center_orbit.bin"
+  ]
+}

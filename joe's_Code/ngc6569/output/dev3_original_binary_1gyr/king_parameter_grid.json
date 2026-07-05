@@ -1,0 +1,28 @@
+{
+  "binary_file": "king_parameter_grid.bin",
+  "dtype": "float64",
+  "shape": [
+    9,
+    9
+  ],
+  "columns": [
+    "model_id",
+    "W0",
+    "scale_radius",
+    "Nbody",
+    "total_mass",
+    "median_r",
+    "r90",
+    "median_speed",
+    "speed90"
+  ],
+  "units": {
+    "scale_radius": "kpc",
+    "total_mass": "Msun",
+    "median_r": "kpc",
+    "r90": "kpc",
+    "median_speed": "km/s",
+    "speed90": "km/s"
+  },
+  "description": "Summary statistics for the King W0/scale-radius grid."
+}

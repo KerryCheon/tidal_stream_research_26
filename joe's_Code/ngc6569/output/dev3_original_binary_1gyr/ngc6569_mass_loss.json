@@ -1,0 +1,23 @@
+{
+  "binary_file": "ngc6569_mass_loss.bin",
+  "dtype": "float64",
+  "shape": [
+    3428,
+    6
+  ],
+  "columns": [
+    "time_to_present",
+    "elapsed_time",
+    "bound_mass",
+    "bound_mass_fraction",
+    "bound_energy",
+    "galactocentric_distance"
+  ],
+  "units": {
+    "time_to_present": "Myr",
+    "elapsed_time": "Myr",
+    "bound_mass": "Msun",
+    "galactocentric_distance": "kpc"
+  },
+  "description": "Mass-loss history for the 1 Gyr NGC6569 collisionless run."
+}

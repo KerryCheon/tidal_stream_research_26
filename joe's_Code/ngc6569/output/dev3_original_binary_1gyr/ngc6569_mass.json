@@ -1,0 +1,15 @@
+{
+  "binary_file": "ngc6569_mass.bin",
+  "dtype": "float64",
+  "shape": [
+    150000,
+    1
+  ],
+  "columns": [
+    "mass"
+  ],
+  "units": {
+    "mass": "Msun"
+  },
+  "description": "Initial particle masses for the NGC6569 collisionless run."
+}
