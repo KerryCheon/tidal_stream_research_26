@@ -29,9 +29,12 @@ import numpy as np
 import astropy.units as u
 import agama
 
+# Tell Agama what physical units this script will use everywhere.
 agama.setUnits(length=1 * u.kpc, velocity=1 * u.km / u.s, mass=1 * u.Msun)
 
+# Find the folder that contains this Python file.
 _HERE = os.path.dirname(os.path.abspath(__file__))
+# Build the path to the default Milky Way potential file next to this script.
 _DEFAULT_INI = os.path.join(_HERE, "milkyway", "MWPotential2014.ini")
 
 
@@ -47,21 +50,33 @@ def gc_initial_conditions(R_apo, R_peri, inclination_deg=0.0, potential=None):
     potential : agama.Potential, optional
         Host potential. Defaults to MWPotential2014 (milkyway/MWPotential2014.ini).
     """
+    # Use the supplied potential if one was passed in; otherwise load the default MW model.
     pot = potential if potential is not None else agama.Potential(_DEFAULT_INI)
 
+    # Convert apo/pericenter radii into orbital eccentricity.
     e = (R_apo - R_peri) / (R_apo + R_peri)
 
-    if e < 1e-8:                                   # circular orbit
-        a_R = pot.force([R_apo, 0.0, 0.0])[0]      # radial accel (negative)
+    # If eccentricity is basically zero, treat the orbit as circular.
+    if e < 1e-8:
+        # Ask the potential for the force at x=R_apo, then take the x/radial component.
+        a_R = pot.force([R_apo, 0.0, 0.0])[0]
+        # Circular speed satisfies V^2 / R = inward acceleration, so V = sqrt(-a_R * R).
         V_a = np.sqrt(-a_R * R_apo)
     else:
+        # Get the gravitational potential energy per unit mass at apocenter.
         phi_a = pot.potential([R_apo, 0.0, 0.0])
+        # Get the gravitational potential energy per unit mass at pericenter.
         phi_p = pot.potential([R_peri, 0.0, 0.0])
+        # Solve conservation of energy + angular momentum for apocenter speed.
         V_a = (1.0 - e) * np.sqrt((phi_a - phi_p) / (2.0 * e))
 
+    # Convert the user-provided inclination angle from degrees to radians.
     i = np.radians(inclination_deg)
+    # Place the cluster at apocenter on the positive x-axis.
     pos = np.array([R_apo, 0.0, 0.0])
+    # Put all velocity in the tangential y/z direction, tilted by inclination.
     vel = np.array([0.0, V_a * np.cos(i), V_a * np.sin(i)])
+    # Return one flat vector: x, y, z, vx, vy, vz.
     return np.concatenate([pos, vel])
 
 
@@ -79,21 +94,36 @@ def sample_king_model(W0_value, r_scale, mass, Nbody):
     Nbody : int
         Number of particles to sample.
     """
+    # Create the self-gravitating King potential for the cluster.
     pot_sat = agama.Potential(type="king", W0=W0_value, scaleRadius=r_scale, mass=mass)
+    # Create the distribution function that describes particle phase-space density.
     df_sat = agama.DistributionFunction(type="quasispherical", potential=pot_sat)
+    # Draw Nbody particles; xv has positions+velocities and particle_mass stores masses.
     xv, particle_mass = agama.GalaxyModel(pot_sat, df_sat).sample(Nbody)
+    # Return the sampled particles plus the model objects in case caller wants to reuse them.
     return xv, particle_mass, pot_sat, df_sat
 
 
 if __name__ == "__main__":
+    # Only run this block when the file is executed as a script, not when imported.
     import sys
+    # Require at least apocenter and pericenter as command-line inputs.
     if len(sys.argv) < 3:
+        # Stop early and show the expected command format.
         sys.exit("usage: python gc_initial_conditions.py R_apo R_peri [inclination_deg]")
+    # Parse apocenter radius from the first command-line argument.
     R_apo = float(sys.argv[1])
+    # Parse pericenter radius from the second command-line argument.
     R_peri = float(sys.argv[2])
+    # Parse optional inclination; default to an in-plane orbit if not supplied.
     incl = float(sys.argv[3]) if len(sys.argv) > 3 else 0.0
+    # Compute the six initial-condition numbers.
     ic = gc_initial_conditions(R_apo, R_peri, incl)
+    # Recompute eccentricity for a helpful printed summary.
     e = (R_apo - R_peri) / (R_apo + R_peri)
+    # Print metadata as comments so the numeric line below can be copied into other tools.
     print(f"# R_apo={R_apo} kpc, R_peri={R_peri} kpc, e={e:.3f}, inclination={incl} deg")
+    # Label the output columns and units.
     print(f"# x y z vx vy vz   [kpc, km/s]")
+    # Print the initial-condition vector as space-separated values with fixed precision.
     print(" ".join(f"{v:.6f}" for v in ic))
