@@ -18,7 +18,7 @@
   ],
   "units": {
     "time_to_present": "Myr",
-    "elapsed_time": "Myr",
+    "elapsed_time": "Gyr",
     "x_gc": "kpc",
     "y_gc": "kpc",
     "z_gc": "kpc",

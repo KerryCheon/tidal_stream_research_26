@@ -23,5 +23,5 @@
     "vy": "km/s",
     "vz": "km/s"
   },
-  "description": "Original Dev3 King-model sample saved as a raw binary table."
+  "description": "Cached Dev3 King-model sample restored from the NGC6569 run cache."
 }

@@ -11,5 +11,5 @@
   "units": {
     "mass": "Msun"
   },
-  "description": "Initial particle masses for the NGC6569 collisionless run."
+  "description": "Cached particle masses restored from the NGC6569 run cache."
 }

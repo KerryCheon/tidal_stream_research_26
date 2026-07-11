@@ -15,7 +15,7 @@
   ],
   "units": {
     "time_to_present": "Myr",
-    "elapsed_time": "Myr",
+    "elapsed_time": "Gyr",
     "bound_mass": "Msun",
     "galactocentric_distance": "kpc"
   },
