@@ -1,7 +1,9 @@
 import numpy as np
 import pyfalcon
 
-def kdk_leapfrog(pot_ext, pos_0, vel_0, mass, nt, tau, G, eps, time_unit, downsample, 
+from snapshot_store import SnapshotBinaryReader, SnapshotBinaryWriter
+
+def kdk_leapfrog(pot_ext, pos_0, vel_0, mass, nt, tau, G, eps, time_unit, downsample,
                  last_snapshot=True):
     """
     Kick-Drift-Kick leapfrog integrator.
@@ -110,7 +112,66 @@ def kdk_leapfrog(pot_ext, pos_0, vel_0, mass, nt, tau, G, eps, time_unit, downsa
     
     return sim_data
 
-def kdk_leapfrog_TD(pot_ext, pos_0, vel_0, mass, nt, tau, G, eps, time_unit, downsample, 
+
+def kdk_leapfrog_to_disk(pot_ext, pos_0, vel_0, mass, nt, tau, G, eps, time_unit, downsample,
+                          cache_path, last_snapshot=False):
+    """
+    Kick-Drift-Kick leapfrog integrator that streams snapshots to a binary file.
+
+    Identical physics to kdk_leapfrog, but each snapshot is written straight to
+    `cache_path` via SnapshotBinaryWriter as it's produced instead of being
+    accumulated in a Python list. Peak memory is therefore one snapshot, not
+    the whole run, and a snapshot already flushed to disk survives a kernel
+    crash even though later snapshots would be lost.
+
+    Parameters
+    ----------
+    (same as kdk_leapfrog)
+    cache_path : str or Path
+        Destination binary file. A JSON sidecar is written alongside it.
+
+    Returns
+    -------
+    SnapshotBinaryReader
+        Lazy, list-like view over the snapshots just written.
+    """
+    if downsample < 1:
+        raise ValueError("downsample must be >= 1")
+    if nt < 0:
+        raise ValueError("nt must be non-negative")
+
+    pos = np.atleast_2d(np.copy(pos_0))
+    vel = np.atleast_2d(np.copy(vel_0))
+    mass = np.atleast_1d(mass)
+
+    t = 0.0
+    acc, phi = pyfalcon.gravity(pos, G * mass, eps)
+    acc = acc + pot_ext.force(pos)
+
+    writer = SnapshotBinaryWriter(cache_path, n_particles=len(mass))
+    try:
+        for i in range(nt + 1):
+            if i % downsample == 0:
+                writer.append(t * time_unit, pos, vel, phi)
+
+            if i == nt:
+                if last_snapshot and (i % downsample != 0):
+                    writer.append(t * time_unit, pos, vel, phi)
+                break
+
+            vel = vel + acc * tau / 2.0
+            pos = pos + vel * tau
+            acc, phi = pyfalcon.gravity(pos, G * mass, eps)
+            acc = acc + pot_ext.force(pos)
+            vel = vel + acc * tau / 2.0
+            t += tau
+    finally:
+        writer.close()
+
+    return SnapshotBinaryReader(cache_path)
+
+
+def kdk_leapfrog_TD(pot_ext, pos_0, vel_0, mass, nt, tau, G, eps, time_unit, downsample,
                  last_snapshot=True):
     """
     Kick-Drift-Kick leapfrog integrator for time dependent potential 
