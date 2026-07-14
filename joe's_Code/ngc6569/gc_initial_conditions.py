@@ -102,28 +102,3 @@ def sample_king_model(W0_value, r_scale, mass, Nbody):
     xv, particle_mass = agama.GalaxyModel(pot_sat, df_sat).sample(Nbody)
     # Return the sampled particles plus the model objects in case caller wants to reuse them.
     return xv, particle_mass, pot_sat, df_sat
-
-
-if __name__ == "__main__":
-    # Only run this block when the file is executed as a script, not when imported.
-    import sys
-    # Require at least apocenter and pericenter as command-line inputs.
-    if len(sys.argv) < 3:
-        # Stop early and show the expected command format.
-        sys.exit("usage: python gc_initial_conditions.py R_apo R_peri [inclination_deg]")
-    # Parse apocenter radius from the first command-line argument.
-    R_apo = float(sys.argv[1])
-    # Parse pericenter radius from the second command-line argument.
-    R_peri = float(sys.argv[2])
-    # Parse optional inclination; default to an in-plane orbit if not supplied.
-    incl = float(sys.argv[3]) if len(sys.argv) > 3 else 0.0
-    # Compute the six initial-condition numbers.
-    ic = gc_initial_conditions(R_apo, R_peri, incl)
-    # Recompute eccentricity for a helpful printed summary.
-    e = (R_apo - R_peri) / (R_apo + R_peri)
-    # Print metadata as comments so the numeric line below can be copied into other tools.
-    print(f"# R_apo={R_apo} kpc, R_peri={R_peri} kpc, e={e:.3f}, inclination={incl} deg")
-    # Label the output columns and units.
-    print(f"# x y z vx vy vz   [kpc, km/s]")
-    # Print the initial-condition vector as space-separated values with fixed precision.
-    print(" ".join(f"{v:.6f}" for v in ic))
