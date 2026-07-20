@@ -25,14 +25,9 @@ from scipy.optimize import least_squares
 
 import agama
 
-try:
-    from .gc_initial_conditions import sample_king_model
-    from .leap_frog import kdk_leapfrog
-    from .bound_funcs import get_bound_particles
-except ImportError:  # Support running this file directly from helpers/.
-    from gc_initial_conditions import sample_king_model
-    from leap_frog import kdk_leapfrog
-    from bound_funcs import get_bound_particles
+from gc_initial_conditions import sample_king_model
+from leap_frog import kdk_leapfrog
+from bound_funcs import get_bound_particles
 
 FIT_STRUCTURE = False   # set True to also fit W0, log10(r_scale)
 THETA_SEED = 12345

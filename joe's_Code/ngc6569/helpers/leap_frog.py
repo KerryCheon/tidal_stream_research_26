@@ -178,7 +178,7 @@ def kdk_leapfrog_to_disk(pot_ext, pos_0, vel_0, mass, nt, tau, G, eps, time_unit
 
 
 def kdk_leapfrog_TD(pot_ext, pos_0, vel_0, mass, nt, tau, G, eps, time_unit, downsample,
-                 last_snapshot=True):
+                 last_snapshot=True, start_time=0.0):
     """
     Kick-Drift-Kick leapfrog integrator for time dependent potential 
     
@@ -208,6 +208,9 @@ def kdk_leapfrog_TD(pot_ext, pos_0, vel_0, mass, nt, tau, G, eps, time_unit, dow
     last_snapshot : bool, optional
         If True, ensure the final timestep is saved even if not on a 
         downsample boundary. Default is True.
+    start_time : float, optional
+        Absolute starting time in the external potential's native time units.
+        Snapshot times remain elapsed times beginning at zero. Default is 0.
     
     Returns
     -------
@@ -251,7 +254,7 @@ def kdk_leapfrog_TD(pot_ext, pos_0, vel_0, mass, nt, tau, G, eps, time_unit, dow
     
     # Compute initial acceleration and potential
     acc, phi = pyfalcon.gravity(pos, G * mass, eps)
-    acc = acc + pot_ext.force(pos, t=t)
+    acc = acc + pot_ext.force(pos, t=start_time + t)
     
     # Main integration loop
     for i in range(nt + 1):
@@ -275,15 +278,16 @@ def kdk_leapfrog_TD(pot_ext, pos_0, vel_0, mass, nt, tau, G, eps, time_unit, dow
         # Drift: update positions by full timestep
         pos = pos + vel * tau
         
-        # Compute new forces at updated positions
+        # Compute new forces at the updated position and time.
+        next_t = t + tau
         acc, phi = pyfalcon.gravity(pos, G * mass, eps)
-        acc = acc + pot_ext.force(pos, t=t)
+        acc = acc + pot_ext.force(pos, t=start_time + next_t)
         
         # Kick: complete velocity update
         vel = vel + acc * tau / 2.0
         
         # Advance time
-        t += tau
+        t = next_t
     
     return sim_data
 
