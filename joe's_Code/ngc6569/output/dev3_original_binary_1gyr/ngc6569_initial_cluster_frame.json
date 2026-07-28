@@ -1,0 +1,31 @@
+{
+  "binary_file": "ngc6569_initial_cluster_frame.bin",
+  "dtype": "float64",
+  "shape": [
+    150000,
+    9
+  ],
+  "columns": [
+    "mass",
+    "x",
+    "y",
+    "z",
+    "vx",
+    "vy",
+    "vz",
+    "r",
+    "speed"
+  ],
+  "units": {
+    "mass": "Msun",
+    "x": "kpc",
+    "y": "kpc",
+    "z": "kpc",
+    "vx": "km/s",
+    "vy": "km/s",
+    "vz": "km/s",
+    "r": "kpc",
+    "speed": "km/s"
+  },
+  "description": "Initial King-model particles before shifting to the NGC6569 orbit."
+}

@@ -1,0 +1,35 @@
+{
+  "binary_file": "king_particles.bin",
+  "dtype": "float64",
+  "shape": [
+    90000,
+    12
+  ],
+  "columns": [
+    "model_id",
+    "W0",
+    "scale_radius",
+    "mass",
+    "x",
+    "y",
+    "z",
+    "vx",
+    "vy",
+    "vz",
+    "r",
+    "speed"
+  ],
+  "units": {
+    "scale_radius": "kpc",
+    "mass": "Msun",
+    "x": "kpc",
+    "y": "kpc",
+    "z": "kpc",
+    "vx": "km/s",
+    "vy": "km/s",
+    "vz": "km/s",
+    "r": "kpc",
+    "speed": "km/s"
+  },
+  "description": "Particles sampled for the King W0/scale-radius histogram grid."
+}

@@ -1,0 +1,27 @@
+{
+  "binary_file": "cluster_data.bin",
+  "dtype": "float64",
+  "shape": [
+    150000,
+    7
+  ],
+  "columns": [
+    "mass",
+    "x",
+    "y",
+    "z",
+    "vx",
+    "vy",
+    "vz"
+  ],
+  "units": {
+    "mass": "Msun",
+    "x": "kpc",
+    "y": "kpc",
+    "z": "kpc",
+    "vx": "km/s",
+    "vy": "km/s",
+    "vz": "km/s"
+  },
+  "description": "Cached Dev3 King-model sample restored from the NGC6569 run cache."
+}

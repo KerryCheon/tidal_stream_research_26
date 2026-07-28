@@ -1,0 +1,25 @@
+{
+  "source_notebook": "NGC6569_Dev3_original.ipynb",
+  "run_notebook": "NGC6569_Dev3_original_binary_1Gyr.ipynb",
+  "duration_Myr": 1000.0,
+  "Nbody": 150000,
+  "cache_key": "a7cc1e44c3",
+  "cache_payload": {
+    "W0": 7.0,
+    "scale_radius_kpc": 0.001,
+    "cluster_mass_Msun": 459999.99999999994,
+    "Nbody": 150000,
+    "tfin_Myr": -1000.0,
+    "kmax": 16,
+    "eps_kpc": 6.25e-05,
+    "downsample": 20,
+    "potential": "MWPotentialHunter24_rotating.ini"
+  },
+  "binary_tables": [
+    "ngc6569_initial_cluster_frame.bin",
+    "ngc6569_petar_initial.bin",
+    "ngc6569_final_particles.bin",
+    "ngc6569_mass_loss.bin",
+    "ngc6569_center_orbit.bin"
+  ]
+}

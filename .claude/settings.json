@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(venv/bin/python -c \"import numpy; print\\(numpy.version.version\\)\")",
+      "Bash(python3 -m venv venv)",
+      "Bash(venv/bin/python -m pip install --upgrade pip -q)",
+      "Bash(grep -v \"^pyfalcon\" requirements.lock.txt > /tmp/reqs_no_pyfalcon.txt && venv/bin/pip install -r /tmp/reqs_no_pyfalcon.txt -q 2>&1 | tail -5)",
+      "Bash(venv/bin/python -c ' *)"
+    ],
+    "additionalDirectories": [
+      "/tmp"
+    ]
+  }
+}

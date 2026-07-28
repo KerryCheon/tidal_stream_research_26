@@ -1,0 +1,29 @@
+{
+  "binary_file": "ml_W14_r0.00100_k16_eps0.0625_m3.06667_N150000_d6e85533e9.bin",
+  "dtype": "float64",
+  "shape": [
+    3428,
+    2
+  ],
+  "columns": [
+    "elapsed_time",
+    "bound_mass_fraction"
+  ],
+  "units": {
+    "elapsed_time": "Myr"
+  },
+  "description": "Cached NGC6569 mass-loss curve for the Chen Step 2 style sweep.",
+  "cache_key": "d6e85533e9",
+  "cache_payload": {
+    "W0": 14.0,
+    "scale_radius_kpc": 0.001,
+    "kmax": 16,
+    "eps_pc": 0.0625,
+    "m_star": 3.0666666666666664,
+    "Nbody": 150000,
+    "cluster_mass_Msun": 459999.99999999994,
+    "tfin_Myr": -1000.0,
+    "downsample": 20,
+    "potential": "MWPotentialHunter24_rotating.ini"
+  }
+}
