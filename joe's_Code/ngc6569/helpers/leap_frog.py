@@ -9,11 +9,39 @@ try:
 except ImportError:  # Support running this file directly from helpers/.
     from snapshot_store import SnapshotBinaryReader, SnapshotBinaryWriter
 
+def _extra_snapshot_steps(extra_snapshot_myr, tau, time_unit, nt):
+    """Map requested elapsed times (Myr) to the nearest integration step index.
+
+    Mirrors the time bookkeeping in _create_snapshot: at step i, t = i*tau, and
+    the snapshot's elapsed time in Myr is t*time_unit*1000.
+
+    Raises instead of silently dropping an unreachable target, so a forced
+    snapshot request is guaranteed to be honored or the run fails loudly
+    rather than quietly producing an incomplete result.
+    """
+    if not extra_snapshot_myr:
+        return set()
+    myr_per_step = tau * time_unit * 1000.0
+    run_end_myr = nt * myr_per_step
+    steps = set()
+    for target_myr in extra_snapshot_myr:
+        step = int(round(target_myr / myr_per_step))
+        if not (0 <= step <= nt):
+            raise ValueError(
+                f"extra_snapshot_myr: {target_myr} Myr is outside this run's "
+                f"range [0, {run_end_myr:.3f}] Myr"
+            )
+        steps.add(step)
+        actual_myr = step * myr_per_step
+        print(f"extra_snapshot_myr: {target_myr} Myr -> guaranteed at step {step} (t={actual_myr:.3f} Myr)")
+    return steps
+
+
 def kdk_leapfrog(pot_ext, pos_0, vel_0, mass, nt, tau, G, eps, time_unit, downsample,
-                 last_snapshot=True):
+                 last_snapshot=True, extra_snapshot_myr=None):
     """
     Kick-Drift-Kick leapfrog integrator.
-    
+
     Parameters
     ----------
     pot_ext : object
@@ -38,18 +66,23 @@ def kdk_leapfrog(pot_ext, pos_0, vel_0, mass, nt, tau, G, eps, time_unit, downsa
     downsample : int
         Save snapshot data every `downsample` timesteps. Must be >= 1.
     last_snapshot : bool, optional
-        If True, ensure the final timestep is saved even if not on a 
+        If True, ensure the final timestep is saved even if not on a
         downsample boundary. Default is True.
-    
+    extra_snapshot_myr : sequence of float, optional
+        Elapsed times (in Myr) to force a snapshot at, in addition to the
+        regular downsample cadence, e.g. [187.0]. Each target snaps to the
+        nearest integration step, so the saved time may differ slightly from
+        the requested value. Default is None.
+
     Returns
     -------
     list of dict
         List of simulation snapshots, where each snapshot is a dictionary with keys:
         - 'time': float, physical time in units specified by time_unit
         - 'pos': ndarray, shape (N, 3), particle positions
-        - 'vel': ndarray, shape (N, 3), particle velocities  
+        - 'vel': ndarray, shape (N, 3), particle velocities
         - 'phi': ndarray, shape (N,), gravitational potential at each particle
-    
+
     Notes
     -----
     The leapfrog algorithm follows this sequence:
@@ -57,9 +90,9 @@ def kdk_leapfrog(pot_ext, pos_0, vel_0, mass, nt, tau, G, eps, time_unit, downsa
     2. Drift: x_{i+1} = x_i + v_{i+1/2} * dt
     3. Force: compute a_{i+1} from x_{i+1}
     4. Kick: v_{i+1} = v_{i+1/2} + a_{i+1} * dt/2
-    
+
     This method is symplectic and time-reversible.
-    
+
     """
     # Input validation
     if downsample < 1:
@@ -67,55 +100,58 @@ def kdk_leapfrog(pot_ext, pos_0, vel_0, mass, nt, tau, G, eps, time_unit, downsa
     if nt < 0:
         raise ValueError("nt must be non-negative")
 
-    # position and velocity arrays 
+    extra_steps = _extra_snapshot_steps(extra_snapshot_myr, tau, time_unit, nt)
+
+    # position and velocity arrays
     pos = np.copy(pos_0)
     vel = np.copy(vel_0)
-    
+
     # Ensure arrays are proper numpy arrays with correct shapes
     pos = np.atleast_2d(pos)
     vel = np.atleast_2d(vel)
     mass = np.atleast_1d(mass)
-    
+
     # Initialize simulation data storage
     sim_data = []
     t = 0.0
-    
+
     # Compute initial acceleration and potential
     acc, phi = pyfalcon.gravity(pos, G * mass, eps)
     acc = acc + pot_ext.force(pos)
-    
+
     # Main integration loop
     for i in range(nt + 1):
-        # Save snapshot if on downsample boundary
-        if i % downsample == 0:
+        # Save snapshot if on a downsample boundary or a requested extra time
+        saved_this_step = (i % downsample == 0) or (i in extra_steps)
+        if saved_this_step:
             snapshot = _create_snapshot(t, pos, vel, phi, time_unit)
             sim_data.append(snapshot)
-        
+
         # Check if we've reached the final timestep
         if i == nt:
             # Save final snapshot if requested and not already saved
-            if last_snapshot and (i % downsample != 0):
+            if last_snapshot and not saved_this_step:
                 snapshot = _create_snapshot(t, pos, vel, phi, time_unit)
                 sim_data.append(snapshot)
             break
-        
+
         # Leapfrog integration step
         # Kick: update velocities by half timestep
         vel = vel + acc * tau / 2.0
-        
+
         # Drift: update positions by full timestep
         pos = pos + vel * tau
-        
+
         # Compute new forces at updated positions
         acc, phi = pyfalcon.gravity(pos, G * mass, eps)
         acc = acc + pot_ext.force(pos)
-        
+
         # Kick: complete velocity update
         vel = vel + acc * tau / 2.0
-        
+
         # Advance time
         t += tau
-    
+
     return sim_data
 
 
@@ -451,3 +487,42 @@ def kdk_leapfrog_cached(pot_ext, pos_0, vel_0, mass, nt, tau, G, eps, time_unit,
     _validate_cached_snapshots(snapshots, len(mass), expected_count)
 
     return snapshots, cache_path, False
+
+
+def snapshot_times_myr(sim_data, time_unit_to_myr=1000.0):
+    """Elapsed time in Myr for every snapshot.
+
+    ``snapshot["time"]`` is in whatever physical unit was passed as
+    ``time_unit`` to the integrator; every notebook in this repo uses Gyr, so
+    the default multiplies by 1000. Pass a different ``time_unit_to_myr`` if
+    a caller ever uses a different ``time_unit``.
+    """
+    return np.array([snapshot["time"] for snapshot in sim_data]) * time_unit_to_myr
+
+
+def save_snapshot_at_time(sim_data, out_path, target_myr=200.0, time_unit_to_myr=1000.0):
+    """Find the snapshot closest to ``target_myr`` and write it to disk.
+
+    Writes the full snapshot (time, pos, vel, phi) as a single-record binary
+    file with a JSON sidecar, via SnapshotBinaryWriter/Reader.
+
+    Returns
+    -------
+    (Path, int, float)
+        Output path, index of the matched snapshot in ``sim_data``, and its
+        actual elapsed time in Myr.
+    """
+    times_myr = snapshot_times_myr(sim_data, time_unit_to_myr)
+    idx = int(np.argmin(np.abs(times_myr - target_myr)))
+    snapshot = sim_data[idx]
+
+    out_path = Path(out_path)
+    writer = SnapshotBinaryWriter(out_path, n_particles=snapshot["pos"].shape[0])
+    try:
+        writer.append(snapshot["time"], snapshot["pos"], snapshot["vel"], snapshot["phi"])
+    finally:
+        writer.close()
+
+    actual_myr = float(times_myr[idx])
+    print(f"Saved snapshot {idx} (t={actual_myr:.2f} Myr, target={target_myr:.2f} Myr) to {out_path}")
+    return out_path, idx, actual_myr
